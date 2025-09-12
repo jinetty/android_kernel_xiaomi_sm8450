@@ -1642,6 +1642,8 @@ static void retract_page_tables(struct address_space *mapping, pgoff_t pgoff)
 			if (!khugepaged_test_exit(mm)) {
 				struct mmu_notifier_range range;
 
+				vm_write_begin(vma);
+
 				/*
 				 * Re-check whether we have an ->anon_vma, because
 				 * collapse_and_free_pmd() requires that either no

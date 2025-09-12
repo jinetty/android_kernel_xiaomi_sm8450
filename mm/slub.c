@@ -767,6 +767,7 @@ void object_err(struct kmem_cache *s, struct page *page,
 			u8 *object, char *reason)
 {
 	slab_bug(s, "%s", reason);
+	add_taint(TAINT_BAD_PAGE, LOCKDEP_NOW_UNRELIABLE);
 	if (!object || !check_valid_pointer(s, page, object)) {
 		print_page_info(page);
 		pr_err("Invalid pointer 0x%p\n", object);
