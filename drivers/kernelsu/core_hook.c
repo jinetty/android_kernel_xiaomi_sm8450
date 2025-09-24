@@ -53,7 +53,7 @@
 #ifdef CONFIG_KSU_SUSFS
 bool susfs_is_allow_su(void)
 {
-	if (ksu_is_manager()) {
+	if (is_manager()) {
 		// we are manager, allow!
 		return true;
 	}
@@ -119,24 +119,24 @@ static inline void susfs_on_post_fs_data(void) {
 }
 #endif // #ifdef CONFIG_KSU_SUSFS
 
-static bool ksu_module_mounted = false;
+bool ksu_module_mounted = false;
 
-extern int ksu_handle_sepolicy(unsigned long arg3, void __user *arg4);
+extern int handle_sepolicy(unsigned long arg3, void __user *arg4);
 
-bool ksu_su_compat_enabled = true;
+static bool ksu_su_compat_enabled = true;
 extern void ksu_sucompat_init();
 extern void ksu_sucompat_exit();
 
 static inline bool is_allow_su()
 {
-	if (ksu_is_manager()) {
+	if (is_manager()) {
 		// we are manager, allow!
 		return true;
 	}
 	return ksu_is_allow_uid(current_uid().val);
 }
 
-static inline bool is_unsupported_uid(uid_t uid)
+static inline bool is_unsupported_app_uid(uid_t uid)
 {
 #define LAST_APPLICATION_UID 19999
 	uid_t appid = uid % 100000;
@@ -203,11 +203,12 @@ static void disable_seccomp(void)
 #ifdef CONFIG_SECCOMP
 	current->seccomp.mode = 0;
 	current->seccomp.filter = NULL;
+	atomic_set(&current->seccomp.filter_count, 0);
 #else
 #endif
 }
 
-void ksu_escape_to_root(void)
+void escape_to_root(void)
 {
 	struct cred *cred;
 
@@ -265,7 +266,7 @@ void ksu_escape_to_root(void)
 	disable_seccomp();
 	spin_unlock_irq(&current->sighand->siglock);
 
-	ksu_setup_selinux(profile->selinux_domain);
+	setup_selinux(profile->selinux_domain);
 }
 
 int ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
@@ -302,7 +303,7 @@ int ksu_handle_rename(struct dentry *old_dentry, struct dentry *new_dentry)
 	pr_info("renameat: %s -> %s, new path: %s\n", old_dentry->d_iname,
 		new_dentry->d_iname, buf);
 
-	ksu_track_throne();
+	track_throne();
 
 	return 0;
 }
@@ -375,7 +376,7 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 	}
 
 	bool from_root = 0 == current_uid().val;
-	bool from_manager = ksu_is_manager();
+	bool from_manager = is_manager();
 
 #ifdef CONFIG_KSU_KPROBES_HOOK
 	if (!from_root && !from_manager 
@@ -407,7 +408,7 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 	if (arg2 == CMD_GRANT_ROOT) {
 		if (is_allow_su()) {
 			pr_info("allow root for: %d\n", current_uid().val);
-			ksu_escape_to_root();
+			escape_to_root();
 			if (copy_to_user(result, &reply_ok, sizeof(reply_ok))) {
 				pr_err("grant_root: prctl reply error\n");
 			}
@@ -462,13 +463,13 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 		switch (arg3) {
 		case EVENT_POST_FS_DATA: {
 			static bool post_fs_data_lock = false;
-#ifdef CONFIG_KSU_SUSFS
-			susfs_on_post_fs_data();
-#endif
 			if (!post_fs_data_lock) {
 				post_fs_data_lock = true;
 				pr_info("post-fs-data triggered\n");
-				ksu_on_post_fs_data();
+#ifdef CONFIG_KSU_SUSFS
+				susfs_on_post_fs_data();
+#endif
+				on_post_fs_data();
 			}
 			break;
 		}
@@ -496,7 +497,7 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 		if (!from_root) {
 			return 0;
 		}
-		if (!ksu_handle_sepolicy(arg3, arg4)) {
+		if (!handle_sepolicy(arg3, arg4)) {
 			if (copy_to_user(result, &reply_ok, sizeof(reply_ok))) {
 				pr_err("sepolicy: prctl reply error\n");
 			}
@@ -975,14 +976,18 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 	return 0;
 }
 
-static bool is_appuid(kuid_t uid)
+static bool is_non_appuid(kuid_t uid)
 {
 #define PER_USER_RANGE 100000
 #define FIRST_APPLICATION_UID 10000
-#define LAST_APPLICATION_UID 19999
 
 	uid_t appid = uid.val % PER_USER_RANGE;
-	return appid >= FIRST_APPLICATION_UID && appid <= LAST_APPLICATION_UID;
+	return appid < FIRST_APPLICATION_UID;
+}
+
+static inline bool is_some_system_uid(uid_t uid)
+{
+	return uid >= 1000 && uid < 10000;
 }
 
 static bool should_umount(struct path *path)
@@ -1019,9 +1024,9 @@ static int ksu_umount_mnt(struct path *path, int flags)
 }
 
 #ifdef CONFIG_KSU_SUSFS_TRY_UMOUNT
-void ksu_try_umount(const char *mnt, bool check_mnt, int flags, uid_t uid)
+void try_umount(const char *mnt, bool check_mnt, int flags, uid_t uid)
 #else
-static void ksu_try_umount(const char *mnt, bool check_mnt, int flags)
+static void try_umount(const char *mnt, bool check_mnt, int flags)
 #endif
 {
 	struct path path;
@@ -1058,25 +1063,24 @@ static void ksu_try_umount(const char *mnt, bool check_mnt, int flags)
 void susfs_try_umount_all(uid_t uid) {
 	susfs_try_umount(uid);
 	/* For Legacy KSU only */
-	ksu_try_umount("/system", true, 0, uid);
-	ksu_try_umount("/system_ext", true, 0, uid);
-	ksu_try_umount("/vendor", true, 0, uid);
-	ksu_try_umount("/product", true, 0, uid);
-	ksu_try_umount("/odm", true, 0, uid);
+	try_umount("/odm", true, 0, uid);
+	try_umount("/system", true, 0, uid);
+	try_umount("/system_ext", true, 0, uid);
+	try_umount("/vendor", true, 0, uid);
+	try_umount("/product", true, 0, uid);
 	// - For '/data/adb/modules' we pass 'false' here because it is a loop device that we can't determine whether 
 	//   its dev_name is KSU or not, and it is safe to just umount it if it is really a mountpoint
-	ksu_try_umount("/data/adb/modules", false, MNT_DETACH, uid);
+	try_umount("/data/adb/modules", false, MNT_DETACH, uid);
 	/* For both Legacy KSU and Magic Mount KSU */
-	ksu_try_umount("/debug_ramdisk", true, MNT_DETACH, uid);
-	ksu_try_umount("/debug_ramdisk", true, MNT_DETACH, uid);
-	ksu_try_umount("/sbin", false, MNT_DETACH, uid);
+	try_umount("/debug_ramdisk", true, MNT_DETACH, uid);
+    	try_umount("/sbin", false, MNT_DETACH, uid);
 
 	// try umount hosts file
-	ksu_try_umount("/system/etc/hosts", false, MNT_DETACH, uid);
+	try_umount("/system/etc/hosts", false, MNT_DETACH, uid);
 
 	// try umount lsposed dex2oat bins
-	ksu_try_umount("/apex/com.android.art/bin/dex2oat64", false, MNT_DETACH, uid);
-	ksu_try_umount("/apex/com.android.art/bin/dex2oat32", false, MNT_DETACH, uid);
+	try_umount("/apex/com.android.art/bin/dex2oat64", false, MNT_DETACH, uid);
+	try_umount("/apex/com.android.art/bin/dex2oat32", false, MNT_DETACH, uid);
 }
 #endif
 
@@ -1100,80 +1104,46 @@ int ksu_handle_setuid(struct cred *new, const struct cred *old)
 	}
 
 #ifdef CONFIG_KSU_SUSFS
-	// check if current process is zygote
 	bool is_zygote_child = susfs_is_sid_equal(old->security, susfs_zygote_sid);
-#endif // #ifdef CONFIG_KSU_SUSFS
-	if (likely(is_zygote_child)) {
-		// if spawned process is non user app process
-		if (unlikely(new_uid.val < 10000 && new_uid.val >= 1000)) {
-#ifdef CONFIG_KSU_SUSFS_SUS_SU
-			// set flag if zygote spawned system process is allowed for root access
-			if (!ksu_is_allow_uid(new_uid.val)) {
-				task_lock(current);
-				susfs_set_current_proc_su_not_allowed();
-				task_unlock(current);
-			}
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_SU
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-			// umount for the system process if path DATA_ADB_UMOUNT_FOR_ZYGOTE_SYSTEM_PROCESS exists
-			if (susfs_is_umount_for_zygote_system_process_enabled) {
-				goto out_ksu_try_umount;
-			}
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+	if (is_some_system_uid(new_uid.val) && is_zygote_child) {
+		if (ksu_is_allow_uid(new_uid.val)) {
+			return 0;
 		}
-#ifdef CONFIG_KSU_SUSFS
-		// - here we check if uid is a isolated service spawned by zygote directly
-		// - Apps that do not use "useAppZyogte" to start a isolated service will be directly
-		//   spawned by zygote which KSU will ignore it by default, the only fix for now is to
-		//   force a umount for those uid
-		// - Therefore make sure your root app doesn't use isolated service for root access
-		// - Kudos to ThePedroo, the author and maintainer of Rezygisk for finding and reporting
-		//   the detection, really big helps here!
-		else if (new_uid.val >= 90000 && new_uid.val < 1000000) {
-			task_lock(current);
-			susfs_set_current_non_root_user_app_proc();
-#ifdef CONFIG_KSU_SUSFS_SUS_SU
-			susfs_set_current_proc_su_not_allowed();
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_SU
-			task_unlock(current);
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-			susfs_run_sus_path_loop(new_uid.val);
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-			if (susfs_is_umount_for_zygote_iso_service_enabled) {
-				goto out_susfs_try_umount_all;
-			}
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+		if (susfs_is_umount_for_zygote_system_process_enabled) {
+			goto do_umount;
 		}
 	}
 #endif // #ifdef CONFIG_KSU_SUSFS
 
-	if (!is_appuid(new_uid) || is_unsupported_uid(new_uid.val)) {
-		// pr_info("handle setuid ignore non application or isolated uid: %d\n", new_uid.val);
+	if (is_non_appuid(new_uid)) {
+#ifdef CONFIG_KSU_DEBUG
+		pr_info("handle setuid ignore non application uid: %d\n", new_uid.val);
+#endif
 		return 0;
 	}
 
-	if (ksu_is_allow_uid(new_uid.val)) {
-		// pr_info("handle setuid ignore allowed application: %d\n", new_uid.val);
-		return 0;
-	}
+	// isolated process may be directly forked from zygote, always unmount
+	if (is_unsupported_app_uid(new_uid.val)) {
+#ifdef CONFIG_KSU_DEBUG
+		pr_info("handle umount for unsupported application uid: %d\n", new_uid.val);
+#endif
 #ifdef CONFIG_KSU_SUSFS
-	else {
-		task_lock(current);
 		susfs_set_current_non_root_user_app_proc();
-#ifdef CONFIG_KSU_SUSFS_SUS_SU
-		susfs_set_current_proc_su_not_allowed();
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_SU
-		task_unlock(current);
+#endif // #ifdef CONFIG_KSU_SUSFS
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 		susfs_run_sus_path_loop(new_uid.val);
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
+		goto do_umount;
 	}
-#endif // #ifdef CONFIG_KSU_SUSFS
 
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-out_ksu_try_umount:
+
+	if (ksu_is_allow_uid(new_uid.val)) {
+#ifdef CONFIG_KSU_DEBUG
+		pr_info("handle setuid ignore allowed application: %d\n", new_uid.val);
 #endif
+		return 0;
+	}
+
 	if (!ksu_uid_should_umount(new_uid.val)) {
 		return 0;
 	} else {
@@ -1182,13 +1152,15 @@ out_ksu_try_umount:
 #endif
 	}
 
-#ifndef CONFIG_KSU_SUSFS
+do_umount:
 	// check old process's selinux context, if it is not zygote, ignore it!
 	// because some su apps may setuid to untrusted_app but they are in global mount namespace
 	// when we umount for such process, that is a disaster!
-	bool is_zygote_child = ksu_is_zygote(old->security);
-#endif
+#ifdef CONFIG_KSU_SUSFS
 	if (!is_zygote_child) {
+#else
+	if (!is_zygote(old->security)) {
+#endif
 		pr_info("handle umount ignore non zygote child: %d\n",
 			current->pid);
 		return 0;
@@ -1199,30 +1171,35 @@ out_ksu_try_umount:
 		current->pid);
 #endif
 
+#ifdef CONFIG_KSU_SUSFS
+	susfs_set_current_non_root_user_app_proc();
+#endif
+#ifdef CONFIG_KSU_SUSFS_SUS_PATH
+	susfs_run_sus_path_loop(new_uid.val);
+#endif // #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 #ifdef CONFIG_KSU_SUSFS_TRY_UMOUNT
-out_susfs_try_umount_all:
 	// susfs come first, and lastly umount by ksu, make sure umount in reversed order
 	susfs_try_umount_all(new_uid.val);
 #else
 	// fixme: use `collect_mounts` and `iterate_mount` to iterate all mountpoint and
 	// filter the mountpoint whose target is `/data/adb`
-	ksu_try_umount("/odm", true, 0);
-	ksu_try_umount("/system", true, 0);
-	ksu_try_umount("/system_ext", true, 0);
-	ksu_try_umount("/vendor", true, 0);
-	ksu_try_umount("/product", true, 0);
-	ksu_try_umount("/data/adb/modules", false, MNT_DETACH);
+	try_umount("/odm", true, 0);
+	try_umount("/system", true, 0);
+	try_umount("/system_ext", true, 0);
+	try_umount("/vendor", true, 0);
+	try_umount("/product", true, 0);
+	try_umount("/data/adb/modules", false, MNT_DETACH);
 
 	// try umount ksu temp path
-	ksu_try_umount("/debug_ramdisk", false, MNT_DETACH);
-	ksu_try_umount("/sbin", false, MNT_DETACH);
+	try_umount("/debug_ramdisk", false, MNT_DETACH);
+	try_umount("/sbin", false, MNT_DETACH);
 
 	// try umount hosts file
-	ksu_try_umount("/system/etc/hosts", false, MNT_DETACH);
+	try_umount("/system/etc/hosts", false, MNT_DETACH);
 
 	// try umount lsposed dex2oat bins
-	ksu_try_umount("/apex/com.android.art/bin/dex2oat64", false, MNT_DETACH);
-	ksu_try_umount("/apex/com.android.art/bin/dex2oat32", false, MNT_DETACH);
+	try_umount("/apex/com.android.art/bin/dex2oat64", false, MNT_DETACH);
+	try_umount("/apex/com.android.art/bin/dex2oat32", false, MNT_DETACH);
 #endif
 
 	return 0;
