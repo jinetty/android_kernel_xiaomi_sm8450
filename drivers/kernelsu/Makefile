@@ -18,6 +18,8 @@ obj-$(CONFIG_KSU) += kernelsu.o
 
 KSU_LOCAL_VERSION := 2618
 
+ccflags-y += -DKSU_VERSION_TAG=\"v1.1.1\"
+
 # ksu_version: major * 10000 + git version + 200 for historical reasons
 $(eval KSU_VERSION=$(shell expr 10000 + $(KSU_LOCAL_VERSION) + 200))
 $(info -- KernelSU-Next version: $(KSU_VERSION))
