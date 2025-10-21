@@ -125078,10 +125078,10 @@
         <parameter type-id='5c39fc92' name='block' filepath='fs/inode.c' line='1782' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='bpf_dispatcher_xdp_func' mangled-name='bpf_dispatcher_xdp_func' filepath='net/core/filter.c' line='10408' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='bpf_dispatcher_xdp_func'>
-        <parameter type-id='eaa32e2f' name='ctx' filepath='net/core/filter.c' line='10408' column='1'/>
-        <parameter type-id='acada613' name='insnsi' filepath='net/core/filter.c' line='10408' column='1'/>
-        <parameter type-id='531a7450' name='bpf_func' filepath='net/core/filter.c' line='10408' column='1'/>
+      <function-decl name='bpf_dispatcher_xdp_func' mangled-name='bpf_dispatcher_xdp_func' filepath='net/core/filter.c' line='10409' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='bpf_dispatcher_xdp_func'>
+        <parameter type-id='eaa32e2f' name='ctx' filepath='net/core/filter.c' line='10409' column='1'/>
+        <parameter type-id='acada613' name='insnsi' filepath='net/core/filter.c' line='10409' column='1'/>
+        <parameter type-id='531a7450' name='bpf_func' filepath='net/core/filter.c' line='10409' column='1'/>
         <return type-id='f0981eeb'/>
       </function-decl>
       <function-decl name='bpf_prog_add' mangled-name='bpf_prog_add' filepath='kernel/bpf/syscall.c' line='1879' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='bpf_prog_add'>
