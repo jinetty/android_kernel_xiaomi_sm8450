@@ -52,7 +52,7 @@ extern void susfs_auto_add_sus_ksu_default_mount(const char __user *to_pathname)
 bool susfs_is_auto_add_sus_ksu_default_mount_enabled = true;
 #endif
 #ifdef CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT
-extern int susfs_auto_add_sus_bind_mount(const char *pathname, struct path *path_target);
+extern void susfs_auto_add_sus_bind_mount(const char *pathname, struct path *path_target);
 bool susfs_is_auto_add_sus_bind_mount_enabled = true;
 #endif
 #ifdef CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT
