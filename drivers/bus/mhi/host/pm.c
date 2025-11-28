@@ -601,15 +601,6 @@ static void mhi_pm_sys_error_transition(struct mhi_controller *mhi_cntrl)
 	/* Wake up threads waiting for state transition */
 	wake_up_all(&mhi_cntrl->state_event);
 
-	/* Trigger MHI RESET so that the device will not access host memory */
-	if (cur_state != MHI_PM_SYS_ERR_PROCESS) {
-		dev_err(dev, "Failed to transition to state: %s from: %s\n",
-			to_mhi_pm_state_str(MHI_PM_SYS_ERR_PROCESS),
-			to_mhi_pm_state_str(cur_state));
-		mutex_unlock(&mhi_cntrl->pm_mutex);
-		return;
-	}
-
 	if (MHI_REG_ACCESS_VALID(prev_state)) {
 		/*
 		 * If the device is in PBL or SBL, it will only respond to
