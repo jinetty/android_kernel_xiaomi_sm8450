@@ -129347,20 +129347,20 @@
         <parameter type-id='68a2d05b' name='ndev' filepath='net/devres.c' line='67' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='devm_regmap_add_irq_chip' mangled-name='devm_regmap_add_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='996' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='devm_regmap_add_irq_chip'>
-        <parameter type-id='fa0b179b' name='dev' filepath='drivers/base/regmap/regmap-irq.c' line='996' column='1'/>
-        <parameter type-id='29af9a71' name='map' filepath='drivers/base/regmap/regmap-irq.c' line='996' column='1'/>
-        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='996' column='1'/>
-        <parameter type-id='95e97e5e' name='irq_flags' filepath='drivers/base/regmap/regmap-irq.c' line='997' column='1'/>
-        <parameter type-id='95e97e5e' name='irq_base' filepath='drivers/base/regmap/regmap-irq.c' line='997' column='1'/>
-        <parameter type-id='78965926' name='chip' filepath='drivers/base/regmap/regmap-irq.c' line='998' column='1'/>
-        <parameter type-id='a731d0ec' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='999' column='1'/>
+      <function-decl name='devm_regmap_add_irq_chip' mangled-name='devm_regmap_add_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='994' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='devm_regmap_add_irq_chip'>
+        <parameter type-id='fa0b179b' name='dev' filepath='drivers/base/regmap/regmap-irq.c' line='994' column='1'/>
+        <parameter type-id='29af9a71' name='map' filepath='drivers/base/regmap/regmap-irq.c' line='994' column='1'/>
+        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='994' column='1'/>
+        <parameter type-id='95e97e5e' name='irq_flags' filepath='drivers/base/regmap/regmap-irq.c' line='995' column='1'/>
+        <parameter type-id='95e97e5e' name='irq_base' filepath='drivers/base/regmap/regmap-irq.c' line='995' column='1'/>
+        <parameter type-id='78965926' name='chip' filepath='drivers/base/regmap/regmap-irq.c' line='996' column='1'/>
+        <parameter type-id='a731d0ec' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='997' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='devm_regmap_del_irq_chip' mangled-name='devm_regmap_del_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='1016' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='devm_regmap_del_irq_chip'>
-        <parameter type-id='fa0b179b' name='dev' filepath='drivers/base/regmap/regmap-irq.c' line='1016' column='1'/>
-        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='1016' column='1'/>
-        <parameter type-id='a2782ece' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='1017' column='1'/>
+      <function-decl name='devm_regmap_del_irq_chip' mangled-name='devm_regmap_del_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='1014' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='devm_regmap_del_irq_chip'>
+        <parameter type-id='fa0b179b' name='dev' filepath='drivers/base/regmap/regmap-irq.c' line='1014' column='1'/>
+        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='1014' column='1'/>
+        <parameter type-id='a2782ece' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='1015' column='1'/>
         <return type-id='48b5725f'/>
       </function-decl>
       <function-decl name='devm_regmap_field_alloc' mangled-name='devm_regmap_field_alloc' filepath='drivers/base/regmap/regmap.c' line='1270' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='devm_regmap_field_alloc'>
@@ -139342,11 +139342,11 @@
         <parameter type-id='0fbf3cfd' name='skb' filepath='net/core/neighbour.c' line='1489' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='neigh_xmit' mangled-name='neigh_xmit' filepath='net/core/neighbour.c' line='3006' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='neigh_xmit'>
-        <parameter type-id='95e97e5e' name='index' filepath='net/core/neighbour.c' line='3006' column='1'/>
-        <parameter type-id='68a2d05b' name='dev' filepath='net/core/neighbour.c' line='3006' column='1'/>
-        <parameter type-id='eaa32e2f' name='addr' filepath='net/core/neighbour.c' line='3007' column='1'/>
-        <parameter type-id='0fbf3cfd' name='skb' filepath='net/core/neighbour.c' line='3007' column='1'/>
+      <function-decl name='neigh_xmit' mangled-name='neigh_xmit' filepath='net/core/neighbour.c' line='3005' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='neigh_xmit'>
+        <parameter type-id='95e97e5e' name='index' filepath='net/core/neighbour.c' line='3005' column='1'/>
+        <parameter type-id='68a2d05b' name='dev' filepath='net/core/neighbour.c' line='3005' column='1'/>
+        <parameter type-id='eaa32e2f' name='addr' filepath='net/core/neighbour.c' line='3006' column='1'/>
+        <parameter type-id='0fbf3cfd' name='skb' filepath='net/core/neighbour.c' line='3006' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
       <var-decl name='net_namespace_list' type-id='72f469ec' mangled-name='net_namespace_list' visibility='default' filepath='net/core/net_namespace.c' line='36' column='1' elf-symbol-id='net_namespace_list'/>
@@ -141274,7 +141274,7 @@
         <parameter type-id='e4acc659' name='state' filepath='drivers/pci/pci.c' line='1753' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='pci_lock_rescan_remove' mangled-name='pci_lock_rescan_remove' filepath='drivers/pci/probe.c' line='3246' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_lock_rescan_remove'>
+      <function-decl name='pci_lock_rescan_remove' mangled-name='pci_lock_rescan_remove' filepath='drivers/pci/probe.c' line='3242' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_lock_rescan_remove'>
         <return type-id='48b5725f'/>
       </function-decl>
       <function-decl name='pci_map_rom' mangled-name='pci_map_rom' filepath='drivers/pci/rom.c' line='136' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_map_rom'>
@@ -141388,8 +141388,8 @@
         <parameter type-id='80f4b756' name='res_name' filepath='drivers/pci/pci.c' line='3950' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='pci_rescan_bus' mangled-name='pci_rescan_bus' filepath='drivers/pci/probe.c' line='3228' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_rescan_bus'>
-        <parameter type-id='d1feb554' name='bus' filepath='drivers/pci/probe.c' line='3228' column='1'/>
+      <function-decl name='pci_rescan_bus' mangled-name='pci_rescan_bus' filepath='drivers/pci/probe.c' line='3224' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_rescan_bus'>
+        <parameter type-id='d1feb554' name='bus' filepath='drivers/pci/probe.c' line='3224' column='1'/>
         <return type-id='f0981eeb'/>
       </function-decl>
       <function-decl name='pci_reset_function' mangled-name='pci_reset_function' filepath='drivers/pci/pci.c' line='5171' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_reset_function'>
@@ -141449,7 +141449,7 @@
         <parameter type-id='85196e3f' name='dev' filepath='drivers/pci/pci.c' line='4435' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='pci_unlock_rescan_remove' mangled-name='pci_unlock_rescan_remove' filepath='drivers/pci/probe.c' line='3252' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_unlock_rescan_remove'>
+      <function-decl name='pci_unlock_rescan_remove' mangled-name='pci_unlock_rescan_remove' filepath='drivers/pci/probe.c' line='3248' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_unlock_rescan_remove'>
         <return type-id='48b5725f'/>
       </function-decl>
       <function-decl name='pci_unmap_rom' mangled-name='pci_unmap_rom' filepath='drivers/pci/rom.c' line='187' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='pci_unmap_rom'>
@@ -143636,13 +143636,13 @@
         <parameter type-id='d504f73d' name='nb' filepath='mm/vmalloc.c' line='1274' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='regmap_add_irq_chip' mangled-name='regmap_add_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='860' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_add_irq_chip'>
-        <parameter type-id='29af9a71' name='map' filepath='drivers/base/regmap/regmap-irq.c' line='860' column='1'/>
-        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='860' column='1'/>
-        <parameter type-id='95e97e5e' name='irq_flags' filepath='drivers/base/regmap/regmap-irq.c' line='860' column='1'/>
-        <parameter type-id='95e97e5e' name='irq_base' filepath='drivers/base/regmap/regmap-irq.c' line='861' column='1'/>
-        <parameter type-id='78965926' name='chip' filepath='drivers/base/regmap/regmap-irq.c' line='861' column='1'/>
-        <parameter type-id='a731d0ec' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='862' column='1'/>
+      <function-decl name='regmap_add_irq_chip' mangled-name='regmap_add_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='859' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_add_irq_chip'>
+        <parameter type-id='29af9a71' name='map' filepath='drivers/base/regmap/regmap-irq.c' line='859' column='1'/>
+        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='859' column='1'/>
+        <parameter type-id='95e97e5e' name='irq_flags' filepath='drivers/base/regmap/regmap-irq.c' line='859' column='1'/>
+        <parameter type-id='95e97e5e' name='irq_base' filepath='drivers/base/regmap/regmap-irq.c' line='860' column='1'/>
+        <parameter type-id='78965926' name='chip' filepath='drivers/base/regmap/regmap-irq.c' line='860' column='1'/>
+        <parameter type-id='a731d0ec' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='861' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
       <function-decl name='regmap_async_complete' mangled-name='regmap_async_complete' filepath='drivers/base/regmap/regmap.c' line='3167' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_async_complete'>
@@ -143675,9 +143675,9 @@
         <parameter type-id='76a7b3fe' name='table' filepath='drivers/base/regmap/regmap.c' line='75' column='1'/>
         <return type-id='b50a4934'/>
       </function-decl>
-      <function-decl name='regmap_del_irq_chip' mangled-name='regmap_del_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='877' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_del_irq_chip'>
-        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='877' column='1'/>
-        <parameter type-id='a2782ece' name='d' filepath='drivers/base/regmap/regmap-irq.c' line='877' column='1'/>
+      <function-decl name='regmap_del_irq_chip' mangled-name='regmap_del_irq_chip' filepath='drivers/base/regmap/regmap-irq.c' line='876' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_del_irq_chip'>
+        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='876' column='1'/>
+        <parameter type-id='a2782ece' name='d' filepath='drivers/base/regmap/regmap-irq.c' line='876' column='1'/>
         <return type-id='48b5725f'/>
       </function-decl>
       <function-decl name='regmap_exit' mangled-name='regmap_exit' filepath='drivers/base/regmap/regmap.c' line='1487' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_exit'>
@@ -143702,13 +143702,13 @@
         <parameter type-id='29af9a71' name='map' filepath='drivers/base/regmap/regmap.c' line='1561' column='1'/>
         <return type-id='fa0b179b'/>
       </function-decl>
-      <function-decl name='regmap_irq_get_domain' mangled-name='regmap_irq_get_domain' filepath='drivers/base/regmap/regmap-irq.c' line='1072' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_irq_get_domain'>
-        <parameter type-id='a2782ece' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='1072' column='1'/>
+      <function-decl name='regmap_irq_get_domain' mangled-name='regmap_irq_get_domain' filepath='drivers/base/regmap/regmap-irq.c' line='1070' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_irq_get_domain'>
+        <parameter type-id='a2782ece' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='1070' column='1'/>
         <return type-id='7544e824'/>
       </function-decl>
-      <function-decl name='regmap_irq_get_virq' mangled-name='regmap_irq_get_virq' filepath='drivers/base/regmap/regmap-irq.c' line='1052' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_irq_get_virq'>
-        <parameter type-id='a2782ece' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='1052' column='1'/>
-        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='1052' column='1'/>
+      <function-decl name='regmap_irq_get_virq' mangled-name='regmap_irq_get_virq' filepath='drivers/base/regmap/regmap-irq.c' line='1050' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_irq_get_virq'>
+        <parameter type-id='a2782ece' name='data' filepath='drivers/base/regmap/regmap-irq.c' line='1050' column='1'/>
+        <parameter type-id='95e97e5e' name='irq' filepath='drivers/base/regmap/regmap-irq.c' line='1050' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
       <function-decl name='regmap_mmio_detach_clk' mangled-name='regmap_mmio_detach_clk' filepath='drivers/base/regmap/regmap-mmio.c' line='368' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='regmap_mmio_detach_clk'>
@@ -148431,7 +148431,7 @@
         <parameter type-id='3df9fd28' name='st' filepath='kernel/sched/cputime.c' line='634' column='1'/>
         <return type-id='48b5725f'/>
       </function-decl>
-      <var-decl name='task_groups' type-id='72f469ec' mangled-name='task_groups' visibility='default' filepath='kernel/sched/core.c' line='7454' column='1' elf-symbol-id='task_groups'/>
+      <var-decl name='task_groups' type-id='72f469ec' mangled-name='task_groups' visibility='default' filepath='kernel/sched/core.c' line='7447' column='1' elf-symbol-id='task_groups'/>
       <function-decl name='task_may_not_preempt' mangled-name='task_may_not_preempt' filepath='kernel/sched/rt.c' line='1484' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='task_may_not_preempt'>
         <parameter type-id='f23e2572' name='task' filepath='kernel/sched/rt.c' line='1484' column='1'/>
         <parameter type-id='95e97e5e' name='cpu' filepath='kernel/sched/rt.c' line='1484' column='1'/>
@@ -151004,14 +151004,14 @@
         <parameter type-id='8bf48c31' name='intf' filepath='drivers/net/usb/usbnet.c' line='1886' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='usbnet_set_link_ksettings' mangled-name='usbnet_set_link_ksettings' filepath='drivers/net/usb/usbnet.c' line='969' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='usbnet_set_link_ksettings'>
-        <parameter type-id='68a2d05b' name='net' filepath='drivers/net/usb/usbnet.c' line='969' column='1'/>
-        <parameter type-id='b2c34f11' name='cmd' filepath='drivers/net/usb/usbnet.c' line='970' column='1'/>
+      <function-decl name='usbnet_set_link_ksettings' mangled-name='usbnet_set_link_ksettings' filepath='drivers/net/usb/usbnet.c' line='958' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='usbnet_set_link_ksettings'>
+        <parameter type-id='68a2d05b' name='net' filepath='drivers/net/usb/usbnet.c' line='958' column='1'/>
+        <parameter type-id='b2c34f11' name='cmd' filepath='drivers/net/usb/usbnet.c' line='959' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='usbnet_set_msglevel' mangled-name='usbnet_set_msglevel' filepath='drivers/net/usb/usbnet.c' line='1047' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='usbnet_set_msglevel'>
-        <parameter type-id='68a2d05b' name='net' filepath='drivers/net/usb/usbnet.c' line='1047' column='1'/>
-        <parameter type-id='19c2251e' name='level' filepath='drivers/net/usb/usbnet.c' line='1047' column='1'/>
+      <function-decl name='usbnet_set_msglevel' mangled-name='usbnet_set_msglevel' filepath='drivers/net/usb/usbnet.c' line='1036' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='usbnet_set_msglevel'>
+        <parameter type-id='68a2d05b' name='net' filepath='drivers/net/usb/usbnet.c' line='1036' column='1'/>
+        <parameter type-id='19c2251e' name='level' filepath='drivers/net/usb/usbnet.c' line='1036' column='1'/>
         <return type-id='48b5725f'/>
       </function-decl>
       <function-decl name='usbnet_skb_return' mangled-name='usbnet_skb_return' filepath='drivers/net/usb/usbnet.c' line='315' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='usbnet_skb_return'>
@@ -152107,8 +152107,8 @@
         <parameter type-id='ecb0ce18' name='psk' filepath='net/vmw_vsock/virtio_transport_common.c' line='474' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='virtio_transport_free_pkt' mangled-name='virtio_transport_free_pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1233' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='virtio_transport_free_pkt'>
-        <parameter type-id='ac22ee2f' name='pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1233' column='1'/>
+      <function-decl name='virtio_transport_free_pkt' mangled-name='virtio_transport_free_pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1217' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='virtio_transport_free_pkt'>
+        <parameter type-id='ac22ee2f' name='pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1217' column='1'/>
         <return type-id='48b5725f'/>
       </function-decl>
       <function-decl name='virtio_transport_notify_buffer_size' mangled-name='virtio_transport_notify_buffer_size' filepath='net/vmw_vsock/virtio_transport_common.c' line='504' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='virtio_transport_notify_buffer_size'>
@@ -152175,9 +152175,9 @@
         <parameter type-id='6f074813' name='data' filepath='net/vmw_vsock/virtio_transport_common.c' line='593' column='1'/>
         <return type-id='95e97e5e'/>
       </function-decl>
-      <function-decl name='virtio_transport_recv_pkt' mangled-name='virtio_transport_recv_pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1135' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='virtio_transport_recv_pkt'>
-        <parameter type-id='2bfa174e' name='t' filepath='net/vmw_vsock/virtio_transport_common.c' line='1135' column='1'/>
-        <parameter type-id='ac22ee2f' name='pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1136' column='1'/>
+      <function-decl name='virtio_transport_recv_pkt' mangled-name='virtio_transport_recv_pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1122' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='virtio_transport_recv_pkt'>
+        <parameter type-id='2bfa174e' name='t' filepath='net/vmw_vsock/virtio_transport_common.c' line='1122' column='1'/>
+        <parameter type-id='ac22ee2f' name='pkt' filepath='net/vmw_vsock/virtio_transport_common.c' line='1123' column='1'/>
         <return type-id='48b5725f'/>
       </function-decl>
       <function-decl name='virtio_transport_release' mangled-name='virtio_transport_release' filepath='net/vmw_vsock/virtio_transport_common.c' line='871' column='1' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='virtio_transport_release'>
