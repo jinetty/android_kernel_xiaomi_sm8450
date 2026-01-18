@@ -489,9 +489,45 @@ void susfs_sus_ino_for_show_map_vma(unsigned long ino, dev_t *out_dev, unsigned 
 #ifdef CONFIG_KSU_SUSFS_SPOOF_UNAME
 static DEFINE_SPINLOCK(susfs_spin_lock_set_uname);
 static struct st_susfs_uname my_uname;
+static bool susfs_uname_owner; // true = spoof on (non-default)
 static void susfs_my_uname_init(void) {
 	memset(&my_uname, 0, sizeof(my_uname));
 }
+
+// Return if susfs owns (non-default)
+bool susfs_uname_is_active(void)
+{
+	return susfs_uname_owner;
+}
+EXPORT_SYMBOL_GPL(susfs_uname_is_active);
+
+// Updates spoof buffer (called from supercalls (determine ownership))
+int susfs_set_uname_from_kernel(const char *release, const char *version)
+{
+	unsigned long flags;
+
+	spin_lock_irqsave(&susfs_spin_lock_set_uname, flags);
+
+	if (!release || !release[0]) {
+		strncpy(my_uname.release, utsname()->release, __NEW_UTS_LEN);
+	} else {
+		strncpy(my_uname.release, release, __NEW_UTS_LEN);
+	}
+
+	if (!version || !version[0]) {
+		strncpy(my_uname.version, utsname()->version, __NEW_UTS_LEN);
+	} else {
+		strncpy(my_uname.version, version, __NEW_UTS_LEN);
+	}
+
+	spin_unlock_irqrestore(&susfs_spin_lock_set_uname, flags);
+
+	SUSFS_LOGI("kernel-set spoofed release: '%s', version: '%s'\n",
+			my_uname.release, my_uname.version);
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(susfs_set_uname_from_kernel);
 
 void susfs_set_uname(void __user **user_info) {
 	struct st_susfs_uname info = {0};
@@ -502,16 +538,26 @@ void susfs_set_uname(void __user **user_info) {
 	}
 
 	spin_lock(&susfs_spin_lock_set_uname);
-	if (!strcmp(info.release, "default")) {
-		strncpy(my_uname.release, utsname()->release, __NEW_UTS_LEN);
+
+	// SuSFS spoof off (default/default); clear buffer and release ownership
+	if (!strcmp(info.release, "default") && !strcmp(info.version, "default")) {
+		susfs_my_uname_init();
+		susfs_uname_owner = false;
 	} else {
-		strncpy(my_uname.release, info.release, __NEW_UTS_LEN);
+		// SuSFS spoof on; owns, update buffer
+		susfs_uname_owner = true;
+		// disregard toolkit
+
+		if (!strcmp(info.release, "default"))
+			strncpy(my_uname.release, utsname()->release, __NEW_UTS_LEN);
+		else
+			strncpy(my_uname.release, info.release, __NEW_UTS_LEN);
+		if (!strcmp(info.version, "default"))
+			strncpy(my_uname.version, utsname()->version, __NEW_UTS_LEN);
+		else
+			strncpy(my_uname.version, info.version, __NEW_UTS_LEN);
 	}
-	if (!strcmp(info.version, "default")) {
-		strncpy(my_uname.version, utsname()->version, __NEW_UTS_LEN);
-	} else {
-		strncpy(my_uname.version, info.version, __NEW_UTS_LEN);
-	}
+
 	spin_unlock(&susfs_spin_lock_set_uname);
 	SUSFS_LOGI("setting spoofed release: '%s', version: '%s'\n",
 				my_uname.release, my_uname.version);
