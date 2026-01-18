@@ -468,7 +468,50 @@ void susfs_sus_ino_for_show_map_vma(unsigned long ino, dev_t *out_dev, unsigned 
 #ifdef CONFIG_KSU_SUSFS_SPOOF_UNAME
 static struct st_susfs_uname my_uname = {0};
 static bool is_susfs_uname_set = false;
+static bool susfs_uname_owner; // true = spoof on (non-default)
 static DEFINE_SEQLOCK(susfs_uname_seqlock);
+
+static inline void susfs_my_uname_init(void)
+{
+	memset(&my_uname, 0, sizeof(my_uname));
+}
+
+// Return if susfs owns (non-default)
+bool susfs_uname_is_active(void)
+{
+	return READ_ONCE(susfs_uname_owner);
+}
+EXPORT_SYMBOL_GPL(susfs_uname_is_active);
+
+// Updates spoof buffer (called from supercalls (determine ownership))
+int susfs_set_uname_from_kernel(const char *release, const char *version)
+{
+	unsigned long flags;
+
+	write_seqlock_irqsave(&susfs_uname_seqlock, flags);
+
+	if (!release || !release[0]) {
+		strscpy(my_uname.release, utsname()->release, __NEW_UTS_LEN);
+	} else {
+		strncpy(my_uname.release, release, __NEW_UTS_LEN);
+	}
+
+	if (!version || !version[0]) {
+		strscpy(my_uname.version, utsname()->version, __NEW_UTS_LEN);
+	} else {
+		strncpy(my_uname.version, version, __NEW_UTS_LEN);
+	}
+
+	WRITE_ONCE(is_susfs_uname_set, true);
+	// Ownership claims via userspace
+	write_sequnlock_irqrestore(&susfs_uname_seqlock, flags);
+
+	SUSFS_LOGI("kernel-set spoofed release: '%s', version: '%s'\n",
+			my_uname.release, my_uname.version);
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(susfs_set_uname_from_kernel);
 
 void susfs_set_uname(void __user **user_info) {
 	struct st_susfs_uname info = {0};
@@ -484,17 +527,23 @@ void susfs_set_uname(void __user **user_info) {
 	}
 
 	write_seqlock(&susfs_uname_seqlock);
-	if (!strcmp(info.release, "default")) {
-		strscpy(my_uname.release, utsname()->release, __NEW_UTS_LEN);
+	if (!strcmp(info.release, "default") && !strcmp(info.version, "default")) {
+		// SuSFS spoof off; clear buffer + ownership drop
+		susfs_my_uname_init();
+		WRITE_ONCE(susfs_uname_owner, false);
 	} else {
-		strncpy(my_uname.release, info.release, __NEW_UTS_LEN);
-	}
-	if (!strcmp(info.version, "default")) {
+    		// SuSFS spoof on (owns)
+		if (!strcmp(info.release, "default"))
+			strscpy(my_uname.release, utsname()->release, __NEW_UTS_LEN);
+		else
+		    strncpy(my_uname.release, info.release, __NEW_UTS_LEN);
+	if (!strcmp(info.version, "default"))
 		strscpy(my_uname.version, utsname()->version, __NEW_UTS_LEN);
-	} else {
+	else
 		strncpy(my_uname.version, info.version, __NEW_UTS_LEN);
+    WRITE_ONCE(susfs_uname_owner, true);
 	}
-	is_susfs_uname_set = true;
+	WRITE_ONCE(is_susfs_uname_set, true);
 	write_sequnlock(&susfs_uname_seqlock);
 	SUSFS_LOGI("set spoofed release: '%s', version: '%s'\n",
 				my_uname.release, my_uname.version);
