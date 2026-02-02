@@ -1,4 +1,3 @@
-#include <asm-generic/errno-base.h>
 #include <linux/anon_inodes.h>
 #include <linux/capability.h>
 #include <linux/cred.h>
@@ -32,10 +31,6 @@
 #ifndef CONFIG_KSU_SUSFS
 #include "syscall_hook_manager.h"
 #endif // #ifndef CONFIG_KSU_SUSFS
-
-#ifdef CONFIG_KSU_SUSFS
-bool susfs_is_boot_completed_triggered __read_mostly = false;
-#endif // #ifdef CONFIG_KSU_SUSFS
 
 #include "tiny_sulog.c"
 
@@ -129,9 +124,9 @@ static int do_report_event(void __user *arg)
 			boot_complete_lock = true;
 			pr_info("boot_complete triggered\n");
 			on_boot_completed();
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-			susfs_is_boot_completed_triggered = true;
-#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+#ifdef CONFIG_KSU_SUSFS
+			susfs_start_sdcard_monitor_fn();
+#endif // #ifdef CONFIG_KSU_SUSFS
 		}
 		break;
 	}
