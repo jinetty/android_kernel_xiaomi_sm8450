@@ -1,3 +1,4 @@
+#include <asm-generic/errno-base.h>
 #include <linux/anon_inodes.h>
 #include <linux/capability.h>
 #include <linux/cred.h>
@@ -568,7 +569,7 @@ static int add_try_umount(void __user *arg)
         new_entry->umountable = kstrdup(buf, GFP_KERNEL);
         if (!new_entry->umountable) {
             kfree(new_entry);
-            return -1;
+            return -ENOMEM;
         }
 
         down_write(&mount_list_lock);
@@ -581,7 +582,7 @@ static int add_try_umount(void __user *arg)
                 up_write(&mount_list_lock);
                 kfree(new_entry->umountable);
                 kfree(new_entry);
-                return -1;
+                return -EEXIST;
             }
         }
 
