@@ -31,11 +31,11 @@ LPATH := /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin
 MDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 KSU_LOCAL_VERSION := 32967
-$(info -- KernelSU-Next version fallback: $(KSU_LOCAL_VERSION))
+$(info -- KernelSU-Next version: $(KSU_LOCAL_VERSION))
 ccflags-y += -DKSU_VERSION=$(KSU_LOCAL_VERSION)
 
 KSU_VERSION_TAG := v3.0.1
-$(info -- KernelSU-Next tag fallback: $(KSU_VERSION_TAG))
+$(info -- KernelSU-Next tag: $(KSU_VERSION_TAG))
 ccflags-y += -DKSU_VERSION_TAG=\"$(KSU_VERSION_TAG)\"
 
 ifndef KSU_NEXT_MANAGER_SIZE
