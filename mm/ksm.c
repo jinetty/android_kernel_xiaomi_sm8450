@@ -2416,7 +2416,7 @@ next_mm:
 					ksm_scan.address += PAGE_SIZE;
 					*page = tmp_page;
 				} else
-					put_page(tmp_page);
+					put_user_page(tmp_page);
 				mmap_read_unlock(mm);
 				return rmap_item;
 			}
