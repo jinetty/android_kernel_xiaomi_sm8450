@@ -1558,6 +1558,8 @@ retry:
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 	{
 		if (!IS_ERR(dentry) && !found_sus_path && dentry->d_inode && susfs_is_inode_sus_path(dentry->d_inode)) {
+			if (d_in_lookup(dentry))
+				d_lookup_done(dentry);
 			dput(dentry);
 			dentry = lookup_dcache(&susfs_fake_qstr_name, base, flags);
 			found_sus_path = true;
@@ -1579,6 +1581,7 @@ retry:
 		goto skip_orig_flow;
 	}
 #endif
+
 	dentry = d_alloc(base, name);
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 skip_orig_flow:
@@ -1616,7 +1619,9 @@ static struct dentry *lookup_fast(struct nameidata *nd,
 		if (is_nd_state_lookup_last_and_open_last && dentry && !IS_ERR(dentry) && dentry->d_inode &&
 			susfs_is_inode_sus_path(dentry->d_inode))
 		{
-			dput(dentry);
+			if (d_in_lookup(dentry))
+				d_lookup_done(dentry);
+			// no dput() here, __d_lookup_rcu() does not take the dentry->d_lockref.count
 			dentry = NULL;
 		}
 #endif
@@ -1659,6 +1664,8 @@ static struct dentry *lookup_fast(struct nameidata *nd,
 		if (is_nd_state_lookup_last_and_open_last && dentry && !IS_ERR(dentry) && dentry->d_inode &&
 			susfs_is_inode_sus_path(dentry->d_inode))
 		{
+			if (d_in_lookup(dentry))
+				d_lookup_done(dentry);
 			dput(dentry);
 			dentry = NULL;
 		}
@@ -1728,7 +1735,8 @@ retry:
 	if (is_nd_flags_lookup_last && !found_sus_path && dentry && !IS_ERR(dentry) && dentry->d_inode &&
 		susfs_is_inode_sus_path(dentry->d_inode))
 	{
-		d_lookup_done(dentry);
+		if (d_in_lookup(dentry))
+			d_lookup_done(dentry);
 		dput(dentry);
 		dentry = d_alloc_parallel(dir, &susfs_fake_qstr_name, &wq);
 		found_sus_path = true;
@@ -2316,6 +2324,7 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 		err = may_lookup(nd);
 		if (err)
 			return err;
+
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 		dentry = nd->path.dentry;
 		if (dentry->d_inode && susfs_is_inode_sus_path(dentry->d_inode)) {
@@ -2324,7 +2333,6 @@ static int link_path_walk(const char *name, struct nameidata *nd)
 			return -ENOENT;
 		}
 #endif
-
 		hash_len = hash_name(nd->path.dentry, name);
 
 		type = LAST_NORM;
@@ -3288,6 +3296,9 @@ static struct dentry *lookup_open(struct nameidata *nd, struct file *file,
 	if (is_nd_state_open_last && dentry && !IS_ERR(dentry) && dentry->d_inode &&
 		susfs_is_inode_sus_path(dentry->d_inode))
 	{
+		if (d_in_lookup(dentry)) {
+			d_lookup_done(dentry);
+		}
 		dput(dentry);
 		dentry = NULL;
 		found_sus_path = true;
@@ -3672,6 +3683,7 @@ struct file *do_filp_open(int dfd, struct filename *pathname,
 	struct file *filp;
 #ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
 	struct filename *fake_pathname;
+	struct inode *inode;
 #endif
 
 	set_nameidata(&nd, dfd, pathname);
@@ -3681,24 +3693,27 @@ struct file *do_filp_open(int dfd, struct filename *pathname,
 	if (unlikely(filp == ERR_PTR(-ESTALE)))
 		filp = path_openat(&nd, op, flags | LOOKUP_REVAL);
 #ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
-	if (!IS_ERR(filp) &&
-		unlikely(test_bit(AS_FLAGS_OPEN_REDIRECT, &filp->f_inode->i_mapping->flags) &&
-		current_uid().val < 2000))
-	{
-		fake_pathname = susfs_get_redirected_path(filp->f_inode->i_ino);
-		if (!IS_ERR(fake_pathname)) {
-			restore_nameidata();
-			filp_close(filp, NULL);
-			// no need to do `putname(pathname);` here as it will be done by calling process
-			set_nameidata(&nd, dfd, fake_pathname);
-			filp = path_openat(&nd, op, flags | LOOKUP_RCU);
-			if (unlikely(filp == ERR_PTR(-ECHILD)))
-				filp = path_openat(&nd, op, flags);
-			if (unlikely(filp == ERR_PTR(-ESTALE)))
-				filp = path_openat(&nd, op, flags | LOOKUP_REVAL);
-			restore_nameidata();
-			putname(fake_pathname);
-			return filp;
+	if (!IS_ERR(filp)) {
+		inode = file_inode(filp);
+		if (inode->i_mapping &&
+			unlikely(test_bit(AS_FLAGS_OPEN_REDIRECT, &inode->i_mapping->flags)) &&
+			current_uid().val < 2000)
+		{
+			fake_pathname = susfs_get_redirected_path(inode->i_ino);
+			if (!IS_ERR(fake_pathname)) {
+				restore_nameidata();
+				filp_close(filp, NULL);
+				// no need to do `putname(pathname);` here as it will be done by calling process
+				set_nameidata(&nd, dfd, fake_pathname);
+				filp = path_openat(&nd, op, flags | LOOKUP_RCU);
+				if (unlikely(filp == ERR_PTR(-ECHILD)))
+					filp = path_openat(&nd, op, flags);
+				if (unlikely(filp == ERR_PTR(-ESTALE)))
+					filp = path_openat(&nd, op, flags | LOOKUP_REVAL);
+				restore_nameidata();
+				putname(fake_pathname);
+				return filp;
+			}
 		}
 	}
 #endif
