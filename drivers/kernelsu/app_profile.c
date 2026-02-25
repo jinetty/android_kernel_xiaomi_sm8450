@@ -13,9 +13,7 @@
 #include "klog.h" // IWYU pragma: keep
 #include "selinux/selinux.h"
 #include "su_mount_ns.h"
-#ifndef CONFIG_KSU_SUSFS
 #include "syscall_hook_manager.h"
-#endif // #ifndef CONFIG_KSU_SUSFS
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0)
 static struct group_info root_groups = { .usage = REFCOUNT_INIT(2) };
@@ -107,10 +105,9 @@ static void disable_seccomp(void)
 void escape_with_root_profile(void)
 {
     struct cred *cred;
-#ifndef CONFIG_KSU_SUSFS
     struct task_struct *p = current;
     struct task_struct *t;
-#endif // #ifndef CONFIG_KSU_SUSFS
+    struct root_profile profile;
 
     cred = prepare_creds();
     if (!cred) {
@@ -124,46 +121,44 @@ void escape_with_root_profile(void)
         return;
     }
 
-    struct root_profile *profile = ksu_get_root_profile(cred->uid.val);
+    ksu_get_root_profile(cred->uid.val, &profile);
 
-    cred->uid.val = profile->uid;
-    cred->suid.val = profile->uid;
-    cred->euid.val = profile->uid;
-    cred->fsuid.val = profile->uid;
+    cred->uid.val = profile.uid;
+    cred->suid.val = profile.uid;
+    cred->euid.val = profile.uid;
+    cred->fsuid.val = profile.uid;
 
-    cred->gid.val = profile->gid;
-    cred->fsgid.val = profile->gid;
-    cred->sgid.val = profile->gid;
-    cred->egid.val = profile->gid;
+    cred->gid.val = profile.gid;
+    cred->fsgid.val = profile.gid;
+    cred->sgid.val = profile.gid;
+    cred->egid.val = profile.gid;
     cred->securebits = 0;
 
-    BUILD_BUG_ON(sizeof(profile->capabilities.effective) !=
+    BUILD_BUG_ON(sizeof(profile.capabilities.effective) !=
                  sizeof(kernel_cap_t));
 
     // setup capabilities
     // we need CAP_DAC_READ_SEARCH becuase `/data/adb/ksud` is not accessible for non root process
     // we add it here but don't add it to cap_inhertiable, it would be dropped automaticly after exec!
-    u64 cap_for_ksud = profile->capabilities.effective | CAP_DAC_READ_SEARCH;
+    u64 cap_for_ksud = profile.capabilities.effective | CAP_DAC_READ_SEARCH;
     memcpy(&cred->cap_effective, &cap_for_ksud, sizeof(cred->cap_effective));
-    memcpy(&cred->cap_permitted, &profile->capabilities.effective,
+    memcpy(&cred->cap_permitted, &profile.capabilities.effective,
            sizeof(cred->cap_permitted));
-    memcpy(&cred->cap_bset, &profile->capabilities.effective,
+    memcpy(&cred->cap_bset, &profile.capabilities.effective,
            sizeof(cred->cap_bset));
 
-    setup_groups(profile, cred);
-    setup_selinux(profile->selinux_domain, cred);
+    setup_groups(&profile, cred);
+    setup_selinux(profile.selinux_domain, cred);
 
     commit_creds(cred);
 
     disable_seccomp();
 
-#ifndef CONFIG_KSU_SUSFS
     for_each_thread (p, t) {
         ksu_set_task_tracepoint_flag(t);
     }
-#endif // #ifndef CONFIG_KSU_SUSFS
 
-    setup_mount_ns(profile->namespaces);
+    setup_mount_ns(profile.namespaces);
 }
 
 void escape_to_root_for_init(void)
