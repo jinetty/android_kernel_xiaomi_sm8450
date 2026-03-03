@@ -30,11 +30,11 @@ obj-$(CONFIG_KSU) += kernelsu.o
 LPATH := /usr/bin/env PATH="$$PATH":/usr/bin:/usr/local/bin
 MDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-KSU_LOCAL_VERSION := 32967
+KSU_LOCAL_VERSION := 33026
 $(info -- KernelSU-Next version: $(KSU_LOCAL_VERSION))
 ccflags-y += -DKSU_VERSION=$(KSU_LOCAL_VERSION)
 
-KSU_VERSION_TAG := v3.0.1
+KSU_VERSION_TAG := v3.1.0
 $(info -- KernelSU-Next tag: $(KSU_VERSION_TAG))
 ccflags-y += -DKSU_VERSION_TAG=\"$(KSU_VERSION_TAG)\"
 
