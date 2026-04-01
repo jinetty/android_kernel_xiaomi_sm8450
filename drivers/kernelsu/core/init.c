@@ -21,6 +21,7 @@
 #include "infra/file_wrapper.h"
 #include "selinux/selinux.h"
 #include "hook/syscall_hook.h"
+#include "feature/adb_root.h"
 #include "feature/selinux_hide.h"
 #include "infra/symbol_resolver.h"
 
@@ -135,6 +136,8 @@ int __init kernelsu_init(void)
 
 	ksu_feature_init();
 
+	ksu_adb_root_init();
+
 	ksu_lsm_hook_init();
 
 	ksu_selinux_hide_init();
@@ -232,6 +235,8 @@ void __exit kernelsu_exit(void)
 	ksu_selinux_hide_exit();
 
 	ksu_lsm_hook_exit();
+
+	ksu_adb_root_exit();
 
 	ksu_feature_exit();
 
