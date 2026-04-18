@@ -3,8 +3,8 @@
 #include "linux/sched.h"
 #include "objsec.h"
 #include "linux/version.h"
-#include "../klog.h" // IWYU pragma: keep
-#include "../ksu.h"
+#include "klog.h" // IWYU pragma: keep
+#include "ksu.h"
 
 /*
  * Cached SID values for frequently checked contexts.
@@ -209,8 +209,6 @@ bool is_init(const struct cred *cred)
 }
 
 #ifdef CONFIG_KSU_SUSFS
-#define KERNEL_INIT_DOMAIN "u:r:init:s0"
-#define KERNEL_ZYGOTE_DOMAIN "u:r:zygote:s0"
 #define KERNEL_PRIV_APP_DOMAIN "u:r:priv_app:s0:c512,c768"
 
 u32 susfs_ksu_sid = 0;
@@ -221,7 +219,7 @@ u32 susfs_priv_app_sid = 0;
 static inline void susfs_set_sid(const char *secctx_name, u32 *out_sid)
 {
     int err;
-
+    
     if (!secctx_name || !out_sid) {
         pr_err("secctx_name || out_sid is NULL\n");
         return;
@@ -253,7 +251,7 @@ u32 susfs_get_sid_from_name(const char *secctx_name)
 {
     u32 out_sid = 0;
     int err;
-
+    
     if (!secctx_name) {
         pr_err("secctx_name is NULL\n");
         return 0;
@@ -273,7 +271,7 @@ u32 susfs_get_current_sid(void) {
 
 void susfs_set_zygote_sid(void)
 {
-    susfs_set_sid(KERNEL_ZYGOTE_DOMAIN, &susfs_zygote_sid);
+    susfs_set_sid(ZYGOTE_CONTEXT, &susfs_zygote_sid);
 }
 
 bool susfs_is_current_zygote_domain(void) {
@@ -291,7 +289,7 @@ bool susfs_is_current_ksu_domain(void) {
 
 void susfs_set_init_sid(void)
 {
-    susfs_set_sid(KERNEL_INIT_DOMAIN, &susfs_init_sid);
+    susfs_set_sid(INIT_CONTEXT, &susfs_init_sid);
 }
 
 bool susfs_is_current_init_domain(void) {
@@ -302,4 +300,4 @@ void susfs_set_priv_app_sid(void)
 {
     susfs_set_sid(KERNEL_PRIV_APP_DOMAIN, &susfs_priv_app_sid);
 }
-#endif // #ifdef CONFIG_KSU_SUSFS
+#endif
