@@ -119,10 +119,10 @@ int __init kernelsu_init(void)
 		pr_alert("shell is allowed at init!");
 	}
 
-    ksu_cred = prepare_creds();
-    if (!ksu_cred) {
-        pr_err("prepare cred failed!\n");
-    }
+	ksu_cred = prepare_creds();
+	if (!ksu_cred) {
+		pr_err("prepare cred failed!\n");
+	}
 
 #if !defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KPROBES)
 	ksu_syscall_hook_init();
