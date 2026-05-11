@@ -20,6 +20,7 @@
 #include "infra/file_wrapper.h"
 #include "selinux/selinux.h"
 #include "hook/syscall_hook.h"
+#include "feature/selinux_hide.h"
 
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/susfs.h>
@@ -130,6 +131,8 @@ int __init kernelsu_init(void)
 
 	ksu_feature_init();
 
+	ksu_selinux_hide_init();
+
 	ksu_supercalls_init();
 
 #ifdef CONFIG_KSU_SUSFS
@@ -219,6 +222,8 @@ void __exit kernelsu_exit(void)
 	ksu_sucompat_exit();
 	ksu_setuid_hook_exit();
 #endif
+
+	ksu_selinux_hide_exit();
 
 	ksu_feature_exit();
 
