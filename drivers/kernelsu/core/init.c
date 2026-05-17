@@ -22,6 +22,7 @@
 #include "selinux/selinux.h"
 #include "hook/syscall_hook.h"
 #include "feature/selinux_hide.h"
+#include "infra/symbol_resolver.h"
 
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/susfs.h>
@@ -125,6 +126,8 @@ int __init kernelsu_init(void)
 	if (!ksu_cred) {
 		pr_err("prepare cred failed!\n");
 	}
+
+	ksu_init_symbol_resolver();
 
 #if !defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KPROBES)
 	ksu_syscall_hook_init();
