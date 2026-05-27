@@ -52,7 +52,7 @@ long __nocfi ksu_hook_newfstatat(int orig_nr, const struct pt_regs *regs)
     const char __user **filename_user;
     int *flags;
 
-    if (!ksu_su_compat_enabled)
+    if (!static_branch_likely(&ksu_su_compat_enabled))
         return ksu_syscall_table[orig_nr](regs);
 
     dfd = (int *)&PT_REGS_PARM1(regs);
@@ -69,7 +69,7 @@ long __nocfi ksu_hook_faccessat(int orig_nr, const struct pt_regs *regs)
     const char __user **filename_user;
     int *mode;
 
-    if (!ksu_su_compat_enabled)
+    if (!static_branch_likely(&ksu_su_compat_enabled))
         return ksu_syscall_table[orig_nr](regs);
 
     dfd = (int *)&PT_REGS_PARM1(regs);
@@ -102,7 +102,7 @@ long __nocfi ksu_hook_execve(int orig_nr, const struct pt_regs *regs)
         if (ret) {
             pr_err("adb root failed: %ld\n", ret);
         }
-    } else if (ksu_su_compat_enabled) {
+    } else if (static_branch_likely(&ksu_su_compat_enabled)) {
         return ksu_handle_execve_sucompat(filename_user, orig_nr, regs);
     }
 

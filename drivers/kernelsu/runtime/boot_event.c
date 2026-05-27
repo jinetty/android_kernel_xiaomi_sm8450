@@ -1,9 +1,10 @@
-#include "feature/selinux_hide.h"
 #include <linux/err.h>
 #include <linux/fs.h>
 #include <linux/namei.h>
 #include <linux/printk.h>
+#include <linux/jump_label.h>
 
+#include "feature/selinux_hide.h"
 #include "policy/allowlist.h"
 #include "klog.h" // IWYU pragma: keep
 #include "runtime/ksud_boot.h"
@@ -15,8 +16,7 @@ bool ksu_module_mounted __read_mostly = false;
 bool ksu_boot_completed __read_mostly = false;
 
 #ifdef CONFIG_KSU_SUSFS
-#include <linux/jump_label.h>
-extern struct static_key_false ksu_input_hook_key_false;
+extern struct static_key_true ksu_is_input_hook_enabled;
 #endif
 
 extern void ksu_avc_spoof_late_init(void);
@@ -37,9 +37,9 @@ void on_post_fs_data(void)
     ksu_observer_init();
     // Sanity check for safe mode only needs early-boot input samples.
 #ifdef CONFIG_KSU_SUSFS
-    if (static_key_enabled(&ksu_input_hook_key_false)) {
-        static_branch_disable(&ksu_input_hook_key_false);
-        pr_info("disabling ksu_input_hook_key_false\n");
+    if (static_key_enabled(&ksu_is_input_hook_enabled)) {
+        static_branch_disable(&ksu_is_input_hook_enabled);
+        pr_info("ksu_is_input_hook is disabled\n");
     }
 #else
     ksu_stop_input_hook_runtime();

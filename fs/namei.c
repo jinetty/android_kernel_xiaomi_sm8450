@@ -39,6 +39,7 @@
 #include <linux/bitops.h>
 #include <linux/init_task.h>
 #include <linux/uaccess.h>
+
 #if defined(CONFIG_KSU_SUSFS_SUS_PATH) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)
 #include <linux/susfs_def.h>
 #endif
@@ -46,13 +47,13 @@
 #include "internal.h"
 #include "mount.h"
 
-#define CREATE_TRACE_POINTS
-#include <trace/events/namei.h>
-
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 extern bool susfs_is_inode_sus_path(struct inode *inode);
 extern const struct qstr susfs_fake_qstr_name;
 #endif
+
+#define CREATE_TRACE_POINTS
+#include <trace/events/namei.h>
 
 /* [Feb-1997 T. Schoebel-Theuer]
  * Fundamental changes in the pathname lookup mechanisms (namei)
@@ -548,9 +549,6 @@ static void set_nameidata(struct nameidata *p, int dfd, struct filename *name)
 	p->total_link_count = old ? old->total_link_count : 0;
 	p->saved = old;
 	current->nameidata = p;
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	p->state = 0;
-#endif
 }
 
 static void restore_nameidata(void)
@@ -3293,8 +3291,9 @@ static struct dentry *lookup_open(struct nameidata *nd, struct file *file,
 	if (is_nd_state_open_last && dentry && !IS_ERR(dentry) && dentry->d_inode &&
 		susfs_is_inode_sus_path(dentry->d_inode))
 	{
-		if (d_in_lookup(dentry))
+		if (d_in_lookup(dentry)) {
 			d_lookup_done(dentry);
+		}
 		dput(dentry);
 		dentry = NULL;
 		found_sus_path = true;
@@ -4839,7 +4838,7 @@ out:
  * Does not call security hook.
  */
 
- #ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
+#ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
 extern int susfs_open_redirect_spoof_vfs_readlink(struct inode *inode, char __user *buffer, int buflen);
 #endif
 

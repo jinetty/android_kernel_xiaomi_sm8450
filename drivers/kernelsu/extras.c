@@ -8,9 +8,10 @@
 #include "runtime/ksud.h"
 #include "infra/seccomp_cache.h"
 
+#include "linux/jump_label.h"
+
 #ifdef CONFIG_KSU_SUSFS
-#include <linux/jump_label.h>
-extern struct static_key_true susfs_avc_log_spoofing_key_true;
+extern struct static_key_false susfs_is_avc_log_spoofing_enabled;
 #endif
 
 // sorry for the ifdef hell
@@ -41,7 +42,7 @@ static int avc_spoof_feature_set(u64 value)
 	bool enable = value != 0;
 
 #ifdef CONFIG_KSU_SUSFS
-	if (enable && static_branch_likely(&susfs_avc_log_spoofing_key_true)) {
+	if (enable && static_branch_unlikely(&susfs_is_avc_log_spoofing_enabled)) {
 		pr_info("avc_spoof: SuSFS spoof active, skipping ksu toggle\n");
 		return -EBUSY;
 	}
@@ -99,7 +100,7 @@ int ksu_handle_slow_avc_audit(u32 *tsid)
 		return 0;
 
 #ifdef CONFIG_KSU_SUSFS
-	if (static_branch_likely(&susfs_avc_log_spoofing_key_true))
+	if (static_branch_unlikely(&susfs_is_avc_log_spoofing_enabled))
 		return 0;
 #endif
 

@@ -27,10 +27,11 @@
 #include "hook/syscall_hook.h"
 #include "hook/syscall_event_bridge.h"
 
+#include "linux/jump_label.h"
+
 #ifdef CONFIG_KSU_SUSFS
-#include <linux/jump_label.h>
-extern struct static_key_false ksu_init_rc_hook_key_false;
-extern struct static_key_false ksu_input_hook_key_false;
+DEFINE_STATIC_KEY_TRUE(ksu_is_init_rc_hook_enabled);
+DEFINE_STATIC_KEY_TRUE(ksu_is_input_hook_enabled);
 #endif
 
 // clang-format off
@@ -351,9 +352,9 @@ static void ksu_install_rc_hook(struct file *file)
     }
     rc_hooked = true;
 #ifdef CONFIG_KSU_SUSFS
-    if (static_key_enabled(&ksu_init_rc_hook_key_false)) {
-        static_branch_disable(&ksu_init_rc_hook_key_false);
-        pr_info("disabling ksu_init_rc_hook_key_false\n");
+    if (static_key_enabled(&ksu_is_init_rc_hook_enabled)) {
+        static_branch_disable(&ksu_is_init_rc_hook_enabled);
+        pr_info("ksu_init_rc_hook is disabled\n");
     }
 #else
     stop_init_rc_hook();
@@ -418,7 +419,7 @@ static bool is_volumedown_enough(unsigned int count)
 int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value)
 {
 #ifdef CONFIG_KSU_SUSFS
-    if (!static_branch_unlikely(&ksu_input_hook_key_false))
+    if (!static_branch_unlikely(&ksu_is_input_hook_enabled))
         return 0;
 #endif
 
@@ -430,9 +431,9 @@ int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *v
             volumedown_pressed_count += 1;
             if (is_volumedown_enough(volumedown_pressed_count)) {
 #ifdef CONFIG_KSU_SUSFS
-                if (static_key_enabled(&ksu_input_hook_key_false)) {
-                    static_branch_disable(&ksu_input_hook_key_false);
-                    pr_info("disabling ksu_input_hook_key_false\n");
+                if (static_key_enabled(&ksu_is_input_hook_enabled)) {
+                    static_branch_disable(&ksu_is_input_hook_enabled);
+                    pr_info("ksu_input_hook is disabled\n");
                 }
 #else
                 ksu_stop_input_hook_runtime();
@@ -458,9 +459,9 @@ bool ksu_is_safe_mode()
 
     // stop hook first!
 #ifdef CONFIG_KSU_SUSFS
-    if (static_key_enabled(&ksu_input_hook_key_false)) {
-        static_branch_disable(&ksu_input_hook_key_false);
-        pr_info("disabling ksu_input_hook_key_false\n");
+    if (static_key_enabled(&ksu_is_input_hook_enabled)) {
+        static_branch_disable(&ksu_is_input_hook_enabled);
+        pr_info("ksu_input_hook is disabled\n");
     }
 #else
     ksu_stop_input_hook_runtime();

@@ -4,7 +4,9 @@
 #include <linux/types.h>
 #include <linux/version.h>
 
-extern bool ksu_su_compat_enabled;
+#include "linux/jump_label.h"
+
+extern struct static_key_true ksu_su_compat_enabled;
 
 void ksu_sucompat_init(void);
 void ksu_sucompat_exit(void);
@@ -25,7 +27,6 @@ long ksu_handle_execve_sucompat(const char __user **filename_user, int orig_nr, 
 #ifdef CONFIG_KSU_SUSFS
 int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
             void *envp, int *flags);
-int ksu_handle_devpts(struct inode *inode);
 #endif
 
 #endif

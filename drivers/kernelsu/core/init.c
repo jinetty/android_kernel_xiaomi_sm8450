@@ -29,6 +29,7 @@
 #include <linux/susfs.h>
 #include "hook/setuid_hook.h"
 #include "feature/sucompat.h"
+extern void ksu_avc_spoof_late_init(void);
 #endif
 
 #if defined(__x86_64__)
@@ -88,6 +89,10 @@ module_param(allow_shell, bool, 0);
 
 int __init kernelsu_init(void)
 {
+#ifdef CONFIG_KSU_SUSFS
+	susfs_init();
+#endif // #ifdef KSU_SUSFS
+
 #if defined(__x86_64__)
     // If the kernel has the hardening patch, X86_FEATURE_INDIRECT_SAFE must be set 
     if (!boot_cpu_has(X86_FEATURE_INDIRECT_SAFE)) {
@@ -136,16 +141,19 @@ int __init kernelsu_init(void)
 
 	ksu_feature_init();
 
-	ksu_adb_root_init();
-
+#ifndef CONFIG_KSU_SUSFS
+#ifdef CONFIG_KPROBES
 	ksu_lsm_hook_init();
+#endif
+#endif
 
 	ksu_selinux_hide_init();
+
+	ksu_adb_root_init();
 
 	ksu_supercalls_init();
 
 #ifdef CONFIG_KSU_SUSFS
-	susfs_init();
 	ksu_sucompat_init();
 	ksu_setuid_hook_init();
 	ksu_avc_spoof_init();
@@ -176,6 +184,11 @@ int __init kernelsu_init(void)
 
 		ksu_boot_completed = true;
 		track_throne(false);
+
+		#ifdef CONFIG_KSU_SUSFS
+		ksu_avc_spoof_late_init();
+		#endif
+		ksu_selinux_hide_drop_backup_if_unused();
 
 		if (!getenforce()) {
 			pr_info("Permissive SELinux, enforcing\n");
@@ -234,7 +247,11 @@ void __exit kernelsu_exit(void)
 
 	ksu_selinux_hide_exit();
 
+#ifndef CONFIG_KSU_SUSFS
+#ifdef CONFIG_KPROBES
 	ksu_lsm_hook_exit();
+#endif
+#endif
 
 	ksu_adb_root_exit();
 

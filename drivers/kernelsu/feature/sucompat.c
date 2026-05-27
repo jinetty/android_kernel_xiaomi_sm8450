@@ -13,6 +13,8 @@
 #include <linux/ptrace.h>
 #include <linux/namei.h>
 
+#include "linux/jump_label.h"
+
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/susfs_def.h>
 #include <linux/minmax.h>
@@ -26,6 +28,7 @@
 #include "klog.h" // IWYU pragma: keep
 #include "runtime/ksud.h"
 #include "feature/sucompat.h"
+#include "feature/adb_root.h"
 #include "policy/app_profile.h"
 #include "hook/syscall_hook.h"
 
@@ -39,24 +42,29 @@ static const char sh_path[] = SH_PATH;
 static const char su_path[] = SU_PATH;
 static const char ksud_path[] = KSUD_PATH;
 
-// Stubs for future adb_root and sulog integration
-static inline int ksu_adb_root_handle_execve(const char *pathname, void ***envp) { return 0; }
+// Stubs for future sulog integration
 static inline void *ksu_sulog_capture_sucompat(const char *filename, struct user_arg_ptr *argv, gfp_t gfp) { return NULL; }
 static inline void ksu_sulog_emit_pending(void *event, int result, gfp_t gfp) { }
 #endif
 
-bool ksu_su_compat_enabled __read_mostly = true;
+DEFINE_STATIC_KEY_TRUE(ksu_su_compat_enabled);
 
 static int su_compat_feature_get(u64 *value)
 {
-	*value = ksu_su_compat_enabled ? 1 : 0;
+	if (static_key_enabled(&ksu_su_compat_enabled))
+		*value = 1;
+	else
+		*value = 0;
 	return 0;
 }
 
 static int su_compat_feature_set(u64 value)
 {
 	bool enable = value != 0;
-	ksu_su_compat_enabled = enable;
+	if (enable)
+		static_branch_enable(&ksu_su_compat_enabled);
+	else
+		static_branch_disable(&ksu_su_compat_enabled);
 	pr_info("su_compat: set to %d\n", enable);
 	return 0;
 }
@@ -145,7 +153,7 @@ static bool ksu_is_zygote_or_adbd(const char *name, size_t len)
  * return non-zero -> Further checks should be continued afterwards
  */
 int ksu_handle_execveat_init(struct filename *filename, struct user_arg_ptr *argv_user, struct user_arg_ptr *envp_user) {
-    if (current->pid != 1 && is_init(get_current_cred())) {
+    if (is_init(current_cred())) {
         int ret;
         if (unlikely(strcmp(filename->name, KSUD_PATH) == 0)) {
             char tmp_filename[SUSFS_MAX_LEN_PATHNAME] = {0};
@@ -322,30 +330,6 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
 #endif
 
 	return 0;
-}
-#endif
-
-#ifdef CONFIG_KSU_SUSFS
-int ksu_handle_devpts(struct inode *inode)
-{
-    if (!current->mm)
-        return 0;
-
-    uid_t uid = current_uid().val;
-    if (uid % 100000 < 10000)
-        // not untrusted_app, ignore it
-        return 0;
-
-    if (!__ksu_is_allow_uid_for_current(uid))
-        return 0;
-
-    if (ksu_file_sid) {
-        struct inode_security_struct *sec = selinux_inode(inode);
-        if (sec)
-            sec->sid = ksu_file_sid;
-    }
-
-    return 0;
 }
 #endif
 

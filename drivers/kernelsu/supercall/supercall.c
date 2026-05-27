@@ -20,9 +20,10 @@
 
 #include "tiny_sulog.h"
 
+#include "linux/jump_label.h"
+
 #if defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KSU_SUSFS_SPOOF_UNAME)
-#include <linux/jump_label.h>
-extern struct static_key_true susfs_set_uname_key_true;
+extern struct static_key_false susfs_is_uname_spoof_buffer_set;
 #endif
 
 uint32_t ksuver_override = 0;
@@ -180,7 +181,7 @@ int ksu_handle_toolkit_reboot(int magic2, unsigned int cmd, void __user *arg)
         version_buf[sizeof(version_buf) - 1] = '\0';
 
 #if defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KSU_SUSFS_SPOOF_UNAME)
-        if (static_branch_likely(&susfs_set_uname_key_true) && (strcmp(release_buf, "default") || strcmp(version_buf, "default"))) {
+        if (static_branch_unlikely(&susfs_is_uname_spoof_buffer_set) && (strcmp(release_buf, "default") || strcmp(version_buf, "default"))) {
             pr_info("susfs: SuSFS uname active, blocking toolkit apply\n");
             return -EBUSY;
         }
