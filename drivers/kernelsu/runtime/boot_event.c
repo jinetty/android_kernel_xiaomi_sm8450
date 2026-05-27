@@ -44,6 +44,7 @@ void on_post_fs_data(void)
 #else
     ksu_stop_input_hook_runtime();
 #endif
+    ksu_selinux_hide_handle_post_fs_data();
 }
 
 #ifdef CONFIG_EXT4_FS
